@@ -2,6 +2,7 @@
 Gesture recognition and motion controls using just a web camera.
 
 This project has been tested on Windows only.
+
 By: Michael Lu
 
 ## Requred Libaries
@@ -45,6 +46,7 @@ cnn_keras.py - cnn using keras
 
 cnn_kerash.h5 - weights of keras model
 convo_weights.npy - weights of my implementation of my cnn
+
 data/ - contains all pictures used to train the cnn
 reports/ - contains images used in report
 ```

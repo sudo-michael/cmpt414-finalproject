@@ -61,6 +61,8 @@ def camera_to_screen_pos(y, x):
 
 def main():
     hand_score = [np.zeros(6) for _ in range(3)]
+    last_prediction = None
+    in_a_row = 0
     while True:
         check, frame = video.read()
         original = frame.copy()
@@ -96,7 +98,8 @@ def main():
             hand_x = int(m['m10']/m['m00'])
             screen_y, screen_x = camera_to_screen_pos(hand_y - 100, hand_x)
             # make it so mouse movement is mirrord
-            pyautogui.moveTo(3000 - screen_x, screen_y, 1)
+            # COMMENT TO DISABLE MOUSE TRACKING
+            # pyautogui.moveTo(3000 - screen_x, screen_y, 1)
 
             cv2.circle(original, (hand_x, hand_y), 3, (0, 255, 255), 2)
 
@@ -124,24 +127,32 @@ def main():
             hand_score = probabilities
             # print(hand_score)
             label = LABELS[np.argmax(hand_score)]
+            if last_prediction == label:
+                in_a_row += 1
+                if in_a_row == 10:
+                    in_a_row = 0
+                    # COMMENT TO IGNORE
+                    '''
+                    if label == "one":
+                        pyautogui.press('volumeup')
+                    elif label == "two":
+                        pyautogui.press('volumedown')
+                    # elif label == "three":
+                        # pyautogui.press('win')
+                    # elif label == "four":
+                        # pyautogui.click(button='right)
+                    elif label == "five":
+                        pyautogui.press('space')
+                    '''
+            else:
+                last_prediction = label
+                in_a_row = 1
+
             predictions = [f"{p:0.2f}" for p in hand_score[0]]
 
             cv2.rectangle(original, (x,y), (x+w, y+h), (255, 0, 0), 3)
             original = cv2.flip(original, 1)
             cv2.putText(original, label, (400-x+w, y+h), FONT, 1, (0, 0, 255), 2, cv2.LINE_AA)
-
-            '''
-            if label == "one":
-                pyautogui.press('volumeup')
-            elif label == "two":
-                pyautogui.press('volumedown')
-            elif label == "three":
-                pyautogui.press('win')
-            elif label == "five":
-                pyautogui.press('space')
-            '''
-
-
 
 
         if not found:
@@ -156,7 +167,6 @@ def main():
             cv2.imshow(CAMERA_CAPTURE, original)
 
         # cv2.imshow(HAND_CAPTURE, hand_bw)
-
 
         key = cv2.waitKey(1)
         if key == ord('q'):
